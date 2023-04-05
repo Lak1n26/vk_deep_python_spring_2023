@@ -18,6 +18,7 @@ class TestJsonParser(unittest.TestCase):
                 "company": fake.company(),
                 "country": fake.country(),
                 "text": "Проверим работоспособность функции через Factory Boy",
+                "status": "student",
             }
         )
 
@@ -56,16 +57,30 @@ class TestJsonParser(unittest.TestCase):
         self.assertEqual(expected_calls, self.keyword_callback.mock_calls)
 
     def test_parse_json_with_factory_boy(self):
-        self.keyword_callback.return_value = "".join(["Factory", "text"])
         self.assertEqual(
             parse_json(
-                self.fake_json, ["country", "text"], ["Factory"], self.keyword_callback
+                self.fake_json,
+                ["country", "text", "status"],
+                ["Factory", "student"],
+                "".join,
             ),
-            [self.keyword_callback.return_value],
+            ["".join(["text", "Factory"]), "".join(["status", "student"])],
         )
+        self.keyword_callback.return_value = "some_answer"
         self.assertEqual(
-            [mock.call(["text", "Factory"])], self.keyword_callback.mock_calls
+            parse_json(
+                self.fake_json,
+                ["country", "text", "status"],
+                ["Factory", "student"],
+                self.keyword_callback,
+            ),
+            [self.keyword_callback.return_value, self.keyword_callback.return_value],
         )
+        expected_calls = [
+            mock.call(["text", "Factory"]),
+            mock.call(["status", "student"]),
+        ]
+        self.assertEqual(expected_calls, self.keyword_callback.mock_calls)
 
 
 if __name__ == "__main__":
