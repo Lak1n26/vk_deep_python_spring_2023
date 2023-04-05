@@ -14,9 +14,9 @@ def predict_message_mood(
     "отл", если предсказание модели больше good_threshold
     "норм" в остальных случаях
     """
-
-    if model.predict(message) < bad_thresholds:
+    prediction = model.predict(message)
+    if prediction < bad_thresholds:
         return "неуд"
-    if model.predict(message) > good_thresholds:
+    if prediction > good_thresholds:
         return "отл"
     return "норм"
