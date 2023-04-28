@@ -1,0 +1,13 @@
+https://ru.wikipedia.org/wiki/Python
+https://ru.wikipedia.org/wiki/Haskell
+https://ru.wikipedia.org/wiki/C%2B%2B
+https://ru.wikipedia.org/wiki/Java
+https://ru.wikipedia.org/wiki/Perl
+https://ru.wikipedia.org/wiki/Object_Pascal
+https://ru.wikipedia.org/wiki/C_Sharp
+https://ru.wikipedia.org/wiki/Kotlin
+https://ru.wikipedia.org/wiki/JavaScript
+https://ru.wikipedia.org/wiki/Ruby
+https://ru.wikipedia.org/wiki/ECMAScript
+https://ru.wikipedia.org/wiki/TypeScript
+https://ru.wikipedia.org/wiki/CoffeeScript
