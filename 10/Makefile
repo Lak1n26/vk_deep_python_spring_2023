@@ -2,7 +2,7 @@ all: venv install
 
 venv:
 	python -m venv venv
-	venv\Scripts\activate && pip install ujson && pip install faker
+	venv\Scripts\activate && pip install ujson
 
 install:
 	venv\Scripts\activate && python setup.py install
