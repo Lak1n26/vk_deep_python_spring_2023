@@ -1,0 +1,4 @@
+gcc -g -o cjson.so -shared -fPIC cjson.c -I"C:\Users\Данила\AppData\Local\Programs\Python\Python310\include"
+
+
+или питон39
