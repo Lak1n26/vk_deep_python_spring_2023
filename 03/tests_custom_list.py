@@ -13,18 +13,24 @@ class TestCustomList(unittest.TestCase):
 
         self.assertEqual(list(lst1 + lst2), [6, 3, 10, 7])
         self.assertEqual(type(lst1 + lst2), CustomList)
-        self.assertEqual(lst1, CustomList([5, 1, 3, 7]))
-        self.assertEqual(lst2, CustomList([1, 2, 7]))
+        self.assertEqual(list(lst1), [5, 1, 3, 7])
+        self.assertEqual(type(lst1), CustomList)
+        self.assertEqual(list(lst2), [1, 2, 7])
+        self.assertEqual(type(lst2), CustomList)
 
         self.assertEqual(list(lst3 + lst4), [3, 5])
         self.assertEqual(type(lst3 + lst4), CustomList)
-        self.assertEqual(lst3, CustomList([1]))
-        self.assertEqual(lst4, CustomList([2, 5]))
+        self.assertEqual(list(lst3), [1])
+        self.assertEqual(type(lst3), CustomList)
+        self.assertEqual(list(lst4), [2, 5])
+        self.assertEqual(type(lst4), CustomList)
 
         self.assertEqual(list(lst6 + lst5), [3, 5])
         self.assertEqual(type(lst6 + lst5), CustomList)
-        self.assertEqual(lst5, [2, 5])
-        self.assertEqual(lst6, CustomList([1]))
+        self.assertEqual(list(lst5), [2, 5])
+        self.assertEqual(type(lst5), list)
+        self.assertEqual(list(lst6), [1])
+        self.assertEqual(type(lst6), CustomList)
 
         self.assertEqual(list(lst4 + [3, 5, 10]), [5, 10, 10])
         self.assertEqual(list(lst4 + [3]), [5, 5])
@@ -37,8 +43,10 @@ class TestCustomList(unittest.TestCase):
 
         self.assertEqual(list(lst5 + lst4), [4, 10])
         self.assertEqual(type(lst5 + lst4), CustomList)
-        self.assertEqual(lst5, [2, 5])
-        self.assertEqual(lst4, CustomList([2, 5]))
+        self.assertEqual(list(lst5), [2, 5])
+        self.assertEqual(type(lst5), list)
+        self.assertEqual(list(lst4), [2, 5])
+        self.assertEqual(type(lst4), CustomList)
 
         self.assertEqual(
             list([1, 10, 100] + CustomList([2, 20, 200, 2000])),
@@ -48,8 +56,13 @@ class TestCustomList(unittest.TestCase):
         self.assertEqual(list(lst5 + lst6), [3, 5])
         self.assertEqual(type(lst5 + lst6), CustomList)
 
-        self.assertEqual(lst5, [2, 5])
-        self.assertEqual(lst6, CustomList([1]))
+        self.assertEqual(list(lst5), [2, 5])
+        self.assertEqual(list(lst6), [1])
+
+        self.assertEqual(list(lst6 + lst4), [3, 5])
+        self.assertEqual(type(lst6 + lst4), CustomList)
+        self.assertEqual(list(lst6), [1])
+        self.assertEqual(list(lst4), [2, 5])
 
     def test_sub(self):
         lst1 = CustomList([5, 1, 3, 7])
@@ -61,22 +74,26 @@ class TestCustomList(unittest.TestCase):
 
         self.assertEqual(list(lst1 - lst2), [4, -1, -4, 7])
         self.assertEqual(type(lst1 - lst2), CustomList)
-        self.assertEqual(lst1, CustomList([5, 1, 3, 7]))
-        self.assertEqual(lst2, CustomList([1, 2, 7]))
+        self.assertEqual(list(lst1), [5, 1, 3, 7])
+        self.assertEqual(list(lst2), [1, 2, 7])
 
         self.assertEqual(list(lst3 - lst4), [-1, -5])
         self.assertEqual(type(lst3 - lst4), CustomList)
-        self.assertEqual(lst3, CustomList([1]))
-        self.assertEqual(lst4, CustomList([2, 5]))
+        self.assertEqual(list(lst3), [1])
+        self.assertEqual(list(lst4), [2, 5])
 
         self.assertEqual(list(lst6 - lst5), [-1, -5])
         self.assertEqual(type(lst6 - lst5), CustomList)
-        self.assertEqual(lst6, CustomList([1]))
+        self.assertEqual(list(lst6), [1])
         self.assertEqual(lst5, [2, 5])
 
         self.assertEqual(
             list(CustomList([1, 2, 3]) - CustomList([3, 2, 1])), [-2, 0, 2]
         )
+        self.assertEqual(list(lst2 - lst1), [-4, 1, 4, -7])
+        self.assertEqual(list(lst2), [1, 2, 7])
+        self.assertEqual(list(lst1), [5, 1, 3, 7])
+
         self.assertEqual(list(lst4 - [3, 5, 10]), [-1, 0, -10])
         self.assertEqual(list(lst4 - [3]), [-1, 5])
         self.assertEqual(list(lst4 - [3, 5]), [-1, 0])
@@ -85,19 +102,22 @@ class TestCustomList(unittest.TestCase):
         lst4 = CustomList([2, 5])
         lst5 = [2, 5]
         lst6 = CustomList([1])
+        lst2 = CustomList([1, 2, 3])
 
         self.assertEqual(list(lst5 - lst6), [1, 5])
         self.assertEqual(type(lst5 - lst6), CustomList)
         self.assertEqual(lst5, [2, 5])
-        self.assertEqual(lst6, CustomList([1]))
+        self.assertEqual(list(lst6), [1])
 
-        self.assertEqual(lst5 - lst4, CustomList([0, 0]))
+        self.assertEqual(list(lst5 - lst4), [0, 0])
         self.assertEqual(lst5, [2, 5])
-        self.assertEqual(lst4, CustomList([2, 5]))
+        self.assertEqual(list(lst4), [2, 5])
 
         self.assertEqual(
             list([35, 15, 20] - CustomList([40, 20, 25, 5])), [-5, -5, -5, -5]
         )
+        self.assertEqual(list(lst5 - lst2), [1, 3, -3])
+        self.assertEqual(list(lst2), [1, 2, 3])
 
     def test_eq(self):
         lst1 = CustomList([5, 1, 3, 7])
