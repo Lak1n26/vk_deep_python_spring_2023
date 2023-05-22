@@ -1,0 +1,9 @@
+[MESSAGES CONTROL]
+
+disable=
+    missing-docstring,
+    import-error,
+    invalid-name,
+    broad-exception-caught,
+    inconsistent-return-statements,
+    unspecified-encoding

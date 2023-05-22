@@ -4,57 +4,32 @@ import threading
 import subprocess
 import client
 import server
+import socket
+import json
+from unittest.mock import MagicMock, patch
 
-class ClientServerTests(unittest.TestCase):
-    def setUp(self):
-        server.Master.NEED_TO_GET = 20
-        sys.argv = ["client.py", "12", "URLS.txt"]
-        self.THREADS, self.PATH = client.get_client_parameters()
-        self.sem = threading.Semaphore(1)
 
-    def test_get_client_parameters(self):
-        sys.argv = ["client.py", "12", "URLS.txt"]
-        self.assertEqual(client.get_client_parameters(), (12, "URLS.txt"))
+class TestClient(unittest.TestCase):
+    def test_get_client_args(self):
+        sys.argv = ["client.py", "10", "URLS.txt"]
+        self.assertEqual((10, "URLS.txt"), client.get_args())
 
-        sys.argv = ["client.py", "1", "URLS.txt"]
-        self.assertEqual(client.get_client_parameters(), (1, "URLS.txt"))
-
-        with self.assertRaises(client.IncorrectParameters) as inc_args:
-            sys.argv = ["client.py", "aaaaaa", "URLS.txt"]
-            client.get_client_parameters()
+        with self.assertRaises(client.IncorrectArgs) as inc_file:
+            sys.argv = ["client.py", "11", "not_existing_file"]
+            client.get_args()
         self.assertTrue(
-            "Введите корректное значение количества потоков" in str(inc_args.exception)
+            "Установите корректные аргументы клиента", str(inc_file.exception)
         )
 
-        with self.assertRaises(client.IncorrectParameters) as inc_args:
-            sys.argv = ["client.py", "12", "some_non_existent_file.txt"]
-            client.get_client_parameters()
-        self.assertTrue("Введите корректное название файла" in str(inc_args.exception))
-
-    def test_get_server_parameters(self):
-        sys.argv = ["server.py", "-w", "1", "-k", "1"]
-        self.assertEqual(server.get_args(), (1, 1))
-
-        sys.argv = ["server.py", "1", "1"]
-        self.assertEqual(server.get_args(), (1, 1))
-
-        sys.argv = ["server.py", "1", "1"]
-        self.assertEqual(server.get_args(), (1, 1))
-
-        sys.argv = ["server.py", "-w", "1", "1"]
-        self.assertEqual(server.get_args(), (1, 1))
-
-        sys.argv = ["server.py", "1", "-k", "1"]
-        self.assertEqual(server.get_args(), (1, 1))
-
-        with self.assertRaises(server.IncorrectParameters) as inc_args:
-            sys.argv = ["server.py", "a", "b"]
-            server.get_args()
+        with self.assertRaises(client.IncorrectArgs) as inc_threads:
+            sys.argv = ["client.py", "0", "100URLS.txt"]
+            client.get_args()
         self.assertTrue(
-            "установите параметры -w и -k" in str(inc_args.exception)
+            "Установите корректные аргументы клиента",
+            str(inc_threads.exception)
         )
 
-    def test_client_generator_url(self):
+    def test_client_queue(self):
         expected_answer = [
             "https://ru.wikipedia.org/wiki/Python",
             "https://ru.wikipedia.org/wiki/Haskell",
@@ -70,21 +45,102 @@ class ClientServerTests(unittest.TestCase):
             "https://ru.wikipedia.org/wiki/TypeScript",
             "https://ru.wikipedia.org/wiki/CoffeeScript",
         ]
-        self.assertEqual(list(client.generator_url(self.sem)), expected_answer)
+        some_client = client.Client(10, "URLS.txt")
+        some_client.read_urls()
+        self.assertEqual(list(some_client.queue.queue), expected_answer)
+        self.assertEqual(some_client.queue.get(), expected_answer[0])
+        self.assertEqual(some_client.queue.get(), expected_answer[1])
 
-    def test_server_client_100_urls(self):
+    def test_client_start(self):
+        self.client = client.Client(2, 'URLS.txt')
+        self.thread = client.ClientThread(
+            MagicMock(),
+            1,
+            MagicMock(),
+            MagicMock()
+        )
+
+        threads = [self.thread, self.thread]
+        with patch.object(
+                client.ClientThread,
+                'start',
+                MagicMock()
+        ) as start_mock:
+            with patch('builtins.range', return_value=range(2)):
+                with patch('client.ClientThread', side_effect=threads):
+                    self.client.start()
+                    self.assertEqual(start_mock.call_count, 2)
+
+
+class TestServer(unittest.TestCase):
+
+    def setUp(self):
+        self.master = server.Master(2, 5)
+        self.client_sock = MagicMock(spec=socket.socket)
+        self.worker = server.Worker(self.master, 1, MagicMock())
+
+    def test_get_server_args(self):
+        sys.argv = ["server.py", "-w", "12", "-k", "7"]
+        self.assertEqual((12, 7), server.get_args())
+
+        with self.assertRaises(server.IncorrectArgs) as err:
+            sys.argv = ["server.py", "-w", "0", "-k", "5"]
+            server.get_args()
+        self.assertTrue(
+            "Установите корректные аргументы сервера", str(err.exception)
+        )
+
+        with self.assertRaises(server.IncorrectArgs) as err:
+            sys.argv = ["server.py", "-w", "15", "-k", "-2"]
+            server.get_args()
+        self.assertTrue(
+            "Установите корректные аргументы сервера", str(err.exception)
+        )
+
+    def test_server_accept_client(self):
+        with patch(
+                'socket.socket.accept',
+                return_value=(self.client_sock, 'address')
+        ):
+            result = self.master.accept_client()
+            self.assertEqual(result, self.client_sock)
+
+    def test_get_url(self):
+        url = "https://ru.wikipedia.org/wiki/Python"
+        self.client_sock.recv.return_value = url.encode()
+        result = self.worker.master.get_url(self.client_sock)
+        self.assertEqual(result, url)
+
+    def test_process_url(self):
+        url = "https://ru.wikipedia.org/wiki/Python"
+        count_words = "{'word1': 40, 'word2': 25, 'word3': 12}"
+        return_val = json.dumps(url + ': ' + count_words)
+        with patch('server.Worker.process_url', return_value=return_val):
+            fetched_url = self.worker.process_url(url)
+            self.assertEqual(
+                json.loads(fetched_url),
+                "https://ru.wikipedia.org/wiki/Python: "
+                "{'word1': 40, 'word2': 25, 'word3': 12}"
+            )
+
+    def test_send_result(self):
+        result = 'some result'
+        locker = MagicMock()
+        self.master.send_result(self.client_sock, result, locker)
+        self.client_sock.send.assert_called_once_with(result.encode())
+        locker.release.assert_called_once()
+        self.assertEqual(self.master.urls_fetched, 1)
+
+
+class TestFULL(unittest.TestCase):
+    def test_server_client_with_100_urls(self):
         def run_client():
-            subprocess.run(["python", "client.py", "2", "100URLS.txt"])
+            subprocess.run(["python", "client.py", "10", "100URLS.txt"])
 
-        def run_server(URLS):
+        def run_server():
             print("Проверка сервер-клиент на файле со 100 URL'ами")
-            sys.argv = ["server.py", "-w", "2", "-k", "7"]
-            w, k = server.get_args()
-            master = server.Master(w, k)
-            server.NEED_TO_GET = URLS
-            master.run_server()
-
-        threading.Thread(target=run_server, args=[10]).start()
+            subprocess.run(["python", "server.py", "-w", "10", "-k", "7"])
+        threading.Thread(target=run_server).start()
         threading.Thread(target=run_client).start()
 
 
