@@ -12,9 +12,12 @@ class TestDescriptors(unittest.TestCase):
         self.assertEqual(self.comp1.amount, 71)
         self.comp1.amount = 0
         self.assertEqual(self.comp1.amount, 0)
+
         with self.assertRaises(IncorrectType) as inc_type:
             self.comp1.amount = -10
         self.assertTrue("-10" in str(inc_type.exception))
+        self.assertEqual(self.comp1.amount, 0)
+
         del self.comp1.amount
         with self.assertRaises(AttributeError) as atr_err:
             print(self.comp1.amount)
@@ -27,18 +30,27 @@ class TestDescriptors(unittest.TestCase):
         self.assertEqual(self.comp1.name, "SBER")
         self.comp1.name = "GAZP"
         self.assertEqual(self.comp1.name, "GAZP")
+
         with self.assertRaises(IncorrectType) as inc_type:
             self.comp1.name = 123
         self.assertTrue("123" in str(inc_type.exception))
+        self.assertEqual(self.comp1.name, "GAZP")
+
         with self.assertRaises(IncorrectType) as inc_type:
             self.comp1.name = "123"
         self.assertTrue("123" in str(inc_type.exception))
+        self.assertEqual(self.comp1.name, "GAZP")
+
         with self.assertRaises(IncorrectType) as inc_type:
             self.comp1.name = "sber"
         self.assertTrue("sber" in str(inc_type.exception))
+        self.assertEqual(self.comp1.name, "GAZP")
+
         with self.assertRaises(IncorrectType) as inc_type:
             self.comp1.name = ""
         self.assertTrue("" in str(inc_type.exception))
+        self.assertEqual(self.comp1.name, "GAZP")
+
         del self.comp1.name
         with self.assertRaises(AttributeError) as atr_err:
             print(self.comp1.name)
@@ -53,12 +65,17 @@ class TestDescriptors(unittest.TestCase):
         self.assertEqual(self.comp1.price, 100.0)
         self.comp1.price = 1.1
         self.assertEqual(self.comp1.price, 1.1)
+
         with self.assertRaises(IncorrectType) as inc_type:
             self.comp1.price = 0
         self.assertTrue("0" in str(inc_type.exception))
+        self.assertTrue(self.comp1.price, 1.1)
+
         with self.assertRaises(IncorrectType) as inc_type:
             self.comp1.price = "some_str"
         self.assertTrue("some_str" in str(inc_type.exception))
+        self.assertTrue(self.comp1.price, 1.1)
+
         del self.comp1.price
         with self.assertRaises(AttributeError) as atr_err:
             print(self.comp1.price)
