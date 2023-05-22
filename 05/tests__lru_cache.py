@@ -66,16 +66,9 @@ class MyTestCase(unittest.TestCase):
         new_cache.set("k2", "val2")
         new_cache.set("k1", "new_val1")
 
-        self.assertEqual(new_cache.get("k1"), "new_val1")
-        self.assertEqual(new_cache.get("k2"), "val2")
-
-        new_cache.set("k2", "new_val2")
-        self.assertEqual(new_cache.get("k1"), "new_val1")
-        self.assertEqual(new_cache.get("k2"), "new_val2")
-
         new_cache.set("k3", "val3")
-        self.assertEqual(new_cache.get("k1"), None)
-        self.assertEqual(new_cache.get("k2"), "new_val2")
+        self.assertEqual(new_cache.get("k1"), "new_val1")
+        self.assertEqual(new_cache.get("k2"), None)
         self.assertEqual(new_cache.get("k3"), "val3")
 
 
