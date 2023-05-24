@@ -1,0 +1,9 @@
+[MESSAGES CONTROL]
+
+disable=
+    missing-docstring,
+    import-error,
+    invalid-name,
+    redefined-outer-name,
+    unused-variable,
+    unused-argument
